@@ -1,12 +1,6 @@
 Yet Another Brainfuck Optimizer & Compiler
 ==========================================
 
-Author
-------
-- Maxime Gaudin
-
-Purpose
--------
 Well... Since the title of the project is a crappy acronym and contains Brainfuck, it's pretty obvious that no real-life goal will be achieved but fun !
 I'll try to implement the following modules :
 

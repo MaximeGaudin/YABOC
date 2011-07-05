@@ -19,4 +19,4 @@ Well, It's a 40 hours project and I hope I will get at least to the optimization
 
 Contribution
 ------------
-*Any* contribution is welcome and I will be pleased to be contact through my GitHub account !
+**Any** contribution is welcome and I will be pleased to be contacted through my GitHub account or via pull request !

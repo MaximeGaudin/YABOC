@@ -1,10 +1,10 @@
 COMPILER=clang++
 CFLAGS=-g -O2
-
 EXEC=yaboc
 
+.SECONDARY:
+
 all: $(EXEC) 
-	
 %.hh: %.nw 
 	@echo "Extraction : $@..."
 	@notangle -R"$* : Header" $< > $@ 

@@ -1,0 +1,91 @@
+#! /bin/bash
+declare -a programs=( "rm" "mkdir" "mv" "pdflatex" "bibtex" "perl" "latexmk" "dot" "convert" );
+
+BUILD_DIRECTORY=build/
+CONFIGURATION_FILE=Makefile.conf
+GLOBAL_FILE=Makefile.global
+STYLE_FILE=style.conf
+
+source ${BUILD_DIRECTORY}${STYLE_FILE}
+
+find_program() {
+	type $1 &>/dev/null || return 1;
+	return 0;
+}
+
+write_configuration () {
+	echo "$2=`which $1`" >> ${BUILD_DIRECTORY}${CONFIGURATION_FILE}
+}
+
+set_configuration() {
+	if [ `find_program "dot"` ]; then
+		if [ `find_program "convert"` ]; then
+			echo "IMAGE_CONVERSION=ENABLED" >> ${BUILD_DIRECTORY}${CONFIGURATION_FILE}
+			write_configuration "dot" "CMD_DOT"
+			write_configuration "convert" "CMD_CONVERT"
+		else
+			echo "IMAGE_CONVERSION=DISABLED" >> ${BUILD_DIRECTORY}${CONFIGURATION_FILE}
+		fi
+	else
+		echo "IMAGE_CONVERSION=DISABLED" >> ${BUILD_DIRECTORY}${CONFIGURATION_FILE}
+	fi
+
+	write_configuration "rm" "CMD_RM"
+	write_configuration "mkdir" "CMD_MKDIR"
+	write_configuration "mv" "CMD_MV"
+	write_configuration "latexmk" "CMD_LATEXMK"
+
+	echo "OUTPUT_FILENAME=$1" >> ${BUILD_DIRECTORY}${CONFIGURATION_FILE}
+	echo "INPUT_FILENAME=main" >> ${BUILD_DIRECTORY}${CONFIGURATION_FILE}
+
+	echo "LATEXMKRC=latexmkrc" >> ${BUILD_DIRECTORY}${CONFIGURATION_FILE}
+
+	echo "BUILD_DIRECTORY=${BUILD_DIRECTORY}" >> ${BUILD_DIRECTORY}${CONFIGURATION_FILE}
+	echo "BIN_DIRECTORY=./" >> ${BUILD_DIRECTORY}${CONFIGURATION_FILE}
+	echo "SRC_DIRECTORY=src/" >> ${BUILD_DIRECTORY}${CONFIGURATION_FILE}
+	echo "TMP_DIRECTORY=/tmp/" >> ${BUILD_DIRECTORY}${CONFIGURATION_FILE}
+	echo "IMG_DIRECTORY=/img/" >> ${BUILD_DIRECTORY}${CONFIGURATION_FILE}
+
+	if [ `uname` == "Darwin" ]; then
+		echo "CMD_VIEWER=open" >> ${BUILD_DIRECTORY}${CONFIGURATION_FILE}
+	else
+		echo "CMD_VIEWER=./" >> ${BUILD_DIRECTORY}${CONFIGURATION_FILE}
+	fi
+}
+
+check_programs() {
+	for i in ${!programs[*]}; do
+		name=${programs[$i]};
+	
+		if find_program "$name"; then
+			echo "${HEADER}Checking $name...${VERT}[OK]${NORMAL}"
+		else
+			if [ ${name} == "dot" ]; then
+				echo "${HEADER}${ROUGE}Checking $name...Not found : image conversion disabled !${NORMAL}"
+			else
+				echo "${HEADER}${ROUGE}Checking $name...Not found !${NORMAL}"
+				exit 1
+			fi
+		fi
+	done
+}
+
+rm ${BUILD_DIRECTORY}${CONFIGURATION_FILE} &>/dev/null
+rm Makefile &>/dev/null
+
+echo "Configuring $1..."
+
+if [ ! $1 ]; then
+	echo "${HEADER}${ROUGE}Enter output filename !${ROUGE}"
+	exit 1
+fi
+
+if [ $2 ]; then
+	echo "PDF_COMPILER=$2" >> ${BUILD_DIRECTORY}${CONFIGURATION_FILE}
+else
+	echo "PDF_COMPILER=pdflatex" >> ${BUILD_DIRECTORY}${CONFIGURATION_FILE}
+fi
+
+check_programs
+set_configuration $1
+cat ${BUILD_DIRECTORY}${GLOBAL_FILE} >> Makefile

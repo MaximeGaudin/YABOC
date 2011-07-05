@@ -1,0 +1,86 @@
+\section{YABOC}
+\gls{YABOC} is a toy project with three main goals :
+\begin{enumerate}
+	\item Getting familiar with \tsl{literate programming},
+	\item getting familiar with code optimization,
+	\item getting familiar with code generation via \tsl{LLVM}.
+\end{enumerate}
+The main feature is to generate optimized (without the LLVM engine$\ldots$) native code from Brainfuck source code but the program can also :
+\begin{itemize}
+	\item Display the preprocessed\pref{significantLexemes} Brainfuck source code,
+	\item Display the optimized Brainfuck source code,
+	\item And display the generated LLVM bytecode.
+\end{itemize}
+
+\newpar Obviously, I do not attempt to be the reference Brainfuck compiler (especially since many exist yet !) but I will try to program in the most generic way. For this purpose, I will only use standard tools such as :
+\begin{itemize}
+	\item \tbf{Make} for build pipeline,
+	\item \tbf{C++ ANSI 99} as programming language,
+	\item \tbf{\LaTeX} as typesetting language,
+	\item \tbf{CLang++} as compiler (which can be switch to g++ without code modification),
+	\item \tbf{LLVM} as code generator,
+	\item and \tbf{Weave} \& \tbf{Tangle} as code dispatchers.
+\end{itemize}
+
+\subsection{Architecture}
+The architecture of \gls{YABOC} if fairly simple since it's pipeline is linear (\cf \fref{fig1}).
+\image[Architecture of YABOC]{img/Architecture.eps}{.2}
+It's composed by :
+\begin{itemize}
+	\item The parser, which read every caracter, transform into \gls{lexeme} and keep only the significant ones\pref{significantLexemes}.
+	\item The optimizer, which transform succession of lexemes into a better efficient one\pref{optimizations}.
+	\item The code generator, which interpret every lexemes to it's LLVM representation.
+	\item The LLVM, which generate the byte code.
+	\item The compiler, which generate the native code.
+\end{itemize}
+
+\newpar Each stage is detailed in the following document.
+
+\subsection{Features}
+\subsubsection{Argument handler}
+<<YABOC : ArgumentHandler>>=
+void ArgumentHandler(int argc, char** argv, bool* optPreprocess) {
+	*optPreprocess = true;
+}
+@
+
+\subsubsection{Preprocessing}
+The preprocessing feature display the kept tokens one following another from the input stream. Because the token out of the scanner are already known to be valid, the method only output the result of [[Scanner : Next]]. After the display of all available tokens, a carriage return is printed.
+
+\newpar If the option was the only specified, the program exits. Otherwise, the other options are handled.
+
+<<YABOC : DisplayPreprocessStream>>=
+void DisplayPreprocessStream ( Scanner& scanner ) {
+	char buffer = scanner.Next();
+	while(buffer != TOKEN_EOF) {
+		if(buffer != TOKEN_OTHER) cout << buffer;
+		buffer = scanner.Next();
+	}
+	cout << endl;
+}
+@
+
+\subsection{Listing}
+<<YABOC : Implementation>>=
+#include <iostream>
+#include "Scanner.hh"
+
+using namespace std;
+
+<<YABOC : DisplayPreprocessStream>>
+
+<<YABOC : ArgumentHandler>>
+
+int main (int argc, char** argv) {
+	bool optPreprocess = false;
+	ArgumentHandler(argc, argv, &optPreprocess);	
+
+	Scanner scanner(cin);
+	if(optPreprocess) DisplayPreprocessStream(scanner);
+
+	return 0;
+}
+@
+
+<<YABOC : Header>>=
+@

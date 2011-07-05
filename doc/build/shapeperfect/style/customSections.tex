@@ -1,0 +1,56 @@
+\newlength{\sectiontitleindent}
+\setlength{\sectiontitleindent}{-1cm}
+
+\newlength{\subsectiontitleindent}
+\setlength{\subsectiontitleindent}{-.5cm}
+
+\newlength{\subsubsectiontitleindent}
+\setlength{\subsubsectiontitleindent}{-.25cm}
+
+\newlength{\paragraphtitleindent}
+\setlength{\paragraphtitleindent}{-.125cm}
+
+\newcommand{\sectionfont}{
+	\fontencoding{\encodingdefault}
+	\fontfamily{pag}
+	\fontseries{bc}
+	\fontshape{n}
+	\selectfont}
+
+\makeatletter
+\renewcommand{\section}{
+	\@startsection
+	{section}
+	{1}
+	{\sectiontitleindent}
+	{-3.5ex plus -1ex minus -.2ex}
+	{2.3ex plus.2ex}
+	{\sectionfont\Large}}
+
+\renewcommand{\subsection}{
+ 	\@startsection
+ 	{subsection}
+ 	{2}
+ 	{\subsectiontitleindent}
+ 	{-3.5ex plus -1ex minus -.2ex}
+ 	{2.3ex plus.2ex}
+ 	{\sectionfont\large}}
+
+\renewcommand{\subsubsection}{
+ 	\@startsection
+ 	{subsubsection}
+ 	{3}
+ 	{\subsubsectiontitleindent}
+ 	{-3.5ex plus -1ex minus -.2ex}
+ 	{2.3ex plus.2ex}
+ 	{\sectionfont}}
+
+\renewcommand{\paragraph}{
+ 	\@startsection
+ 	{paragraph}
+ 	{4}
+ 	{\paragraphtitleindent}
+ 	{-3.5ex plus -1ex minus -.2ex}
+ 	{2.3ex plus.2ex}
+ 	{\sectionfont\normalsize\bf}}
+\makeatother

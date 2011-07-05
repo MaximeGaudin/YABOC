@@ -1,0 +1,33 @@
+\usepackage[ruled]{algorithm}
+\usepackage{algorithmic}
+
+\floatname{algorithm}{Procedure}
+
+\renewcommand{\algorithmicrequire}{\textbf{Input :}}
+\renewcommand{\algorithmicensure}{\textbf{Output :}}
+\newcommand{\assign}{ $\Leftarrow$ }
+
+\newcommand{\lt}{ < }
+\newcommand{\gt}{ > }
+\newcommand{\kw}[1]{\textbf{#1}}
+
+\algsetup{indent=2em}
+\algsetup{
+	linenosize=\small,
+	linenodelimiter=.
+}
+
+\newenvironment{algo}[1][]
+{
+\begin{algorithm}[H]
+\ifthenelse{\equal{#1}{}}
+{\caption{}}
+{\caption{: #1}} 
+
+\begin{algorithmic}[2]
+}
+{
+\end{algorithmic}
+\end{algorithm}
+}
+

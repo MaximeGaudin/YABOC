@@ -1,0 +1,41 @@
+\newdateformat{veryshortdate}{\monthname[\THEMONTH] \THEYEAR}
+
+\newcommand{\titlefont}{%
+\fontencoding{\encodingdefault}%
+\fontfamily{pag}%
+\fontseries{bc}%
+\fontshape{n}%
+\fontsize{25}{20}%
+\selectfont}%
+
+\newcommand{\authorsfont}{%
+\fontencoding{\encodingdefault}%
+\fontfamily{pag}%
+\fontseries{bc}%
+\fontshape{n}%
+\fontsize{8}{5}%
+\selectfont}%
+
+\newlength{\titlehruleheight}
+\setlength{\titlehruleheight}{0.3mm}
+
+\makeatletter
+%Default values
+\def\sp@title{Titre}
+\def\sp@shorttitle{}
+\def\sp@authors{Auteurs}
+
+\renewcommand{\title}[1]{\def\sp@title{#1}}
+\renewcommand{\shorttitle}[1]{\def\sp@shorttitle{#1}}
+\renewcommand{\authors}[1]{\def\sp@authors{#1}}
+%\newcommand{\logo}[1]{\def\sp@logo{#1}}
+
+\renewcommand{\maketitle}
+{%
+	\thispagestyle{fancy}%
+	\begin{center}\titlefont\sp@title\\\end{center}%
+	{\authorsfont\sl\sp@authors\hfill\veryshortdate\today}~\\%
+	\hrule height \titlehruleheight%
+	\vspace*{0.5cm}%
+}
+\makeatother

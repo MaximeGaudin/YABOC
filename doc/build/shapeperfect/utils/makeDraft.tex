@@ -1,0 +1,18 @@
+\usepackage{type1cm}
+\usepackage{eso-pic}
+\usepackage{color}
+
+\makeatletter
+\def\draft{ 
+	\AddToShipoutPicture{%
+		\setlength{\@tempdimb}{.5\paperwidth}%
+			\setlength{\@tempdimc}{.5\paperheight}%
+			\setlength{\unitlength}{1pt}%
+			\put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){%
+				\makebox(0,0){\rotatebox{45}{\textcolor[gray]{0.95}%
+					{\fontsize{6cm}{6cm}\selectfont{DRAFT}}}}%
+			}%  
+	}   
+}
+\makeatother
+

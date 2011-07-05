@@ -1,0 +1,17 @@
+\newlength{\parindentCopy}
+\setlength{\parindentCopy}{\parindent}
+
+%%% Indentation correction
+\newcommand{\newpar}[0]
+{
+	~\\
+	\hspace*{0.8\parindent}
+}
+%
+\newenvironment{unindent}
+{
+	\setlength{\parindent}{0pt}
+}
+{
+	\setlength{\parindent}{\parindentCopy}
+}

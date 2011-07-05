@@ -1,0 +1,22 @@
+\newcommand{\gfont}{%
+	\fontencoding{\encodingdefault}%
+	\fontfamily{ptm}%
+	\fontseries{bc}%
+	\fontshape{bf}%
+	\fontsize{65}{60}%
+	\selectfont}
+
+% \quote[Auteur]{Citation}
+\renewcommand{\quote}[2][null]
+{%
+	~\\
+	\begin{minipage}{\textwidth}%
+	\vspace*{\baselineskip}
+		\parbox{0.2\textwidth} {\textcolor[rgb]{0.5,0.5,0.5}{\gfont "}}%
+			\parbox{0.8\textwidth}%
+			{%
+				\textcolor[rgb]{0.3, 0.3, 0.3}{\textsl{#2}}%
+				\ifthenelse{\equal{#1}{null}}{}{\begin{flushright}\textsc{#1}\end{flushright}}%
+			}%
+	\end{minipage}%
+}%

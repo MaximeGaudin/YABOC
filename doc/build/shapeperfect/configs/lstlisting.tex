@@ -1,0 +1,40 @@
+\usepackage{listingsutf8}
+\usepackage{xcolor}
+\definecolor{colKeys}{rgb}{0,0,1}
+\definecolor{colIdentifier}{rgb}{0,0,0}
+\definecolor{colComments}{rgb}{0,0.6,0.1}
+\definecolor{colString}{rgb}{0.6,0.1,0.1}
+
+\lstset{%configuration de listings 
+	float=hbp,% 
+		basicstyle=\ttfamily\small, % 
+		identifierstyle=\color{colIdentifier}, % 
+		keywordstyle=\color{colKeys}, % 
+		stringstyle=\color{colString}, % 
+		commentstyle=\color{colComments}, % 
+		columns=flexible, % 
+		tabsize=2, % 
+		frame=trBL, % 
+		%frameround=tttt, % 
+		extendedchars=true, % 
+		showspaces=false, % 
+		showstringspaces=false, % 
+		numbers=left, % 
+		numberstyle=\tiny, % 
+		stepnumber=2,%
+		breaklines=true, % 
+		breakautoindent=true, % 
+		captionpos=b,% 
+		xrightmargin=-1cm, % 
+		xleftmargin=-1cm, %
+		inputencoding=utf8
+}
+\lstset{
+	literate=	{é}{{\'e}}1
+			{è}{{\`e}}1
+			{ê}{{\^e}}1
+			{à}{{\`a}}1
+			{ù}{{\`u}}1
+			{ë}{{\"e}}1
+			{ô}{{\^o}}1
+}

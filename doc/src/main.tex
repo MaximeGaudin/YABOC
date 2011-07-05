@@ -1,0 +1,26 @@
+%!TEX TS-program = xetex 
+%!TEX encoding = UTF-8 Unicode
+\documentclass[a4paper]{article}
+
+\input{../build/shapeperfect/utils}
+\input{../build/shapeperfect/sp}
+\input{../build/shapeperfect/extra}
+
+\usepackage{noweb}
+\noweboptions{}
+
+\title{Yet Another Brainfuck Optimizer \& Compiler}
+\authors{Maxime \tsc{Gaudin}}
+\shorttitle{}
+
+\def\brainfuck{\textsl{Brainfuck} }
+
+\begin{document}
+\maketitle
+
+\input{generated}
+
+\newpage
+\printglossaries
+\end{document}
+

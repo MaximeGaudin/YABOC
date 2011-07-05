@@ -1,0 +1,38 @@
+\usepackage{ifxetex}
+
+\ifxetex
+	\usepackage{polyglossia}
+	\setmainlanguage{french}
+	\setotherlanguage{latin}
+\else
+	\usepackage[english, french]{babel}
+	\usepackage[utf8]{inputenc}
+\fi
+
+\usepackage{float}
+\usepackage{array}
+
+\usepackage[top=20mm, bottom=20mm]{geometry}
+
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amsthm}
+
+\bibliographystyle{alpha}
+
+\usepackage{lipsum}
+
+\usepackage{lscape}
+\usepackage{multicol}
+\usepackage[french]{minitoc}
+
+\usepackage{ifthen}
+
+\usepackage{datetime}
+\usepackage{fancybox}
+
+\usepackage[acronym]{glossaries}
+\makeglossary
+
+\input{glossary.tex}
+\input{acronyms.tex}

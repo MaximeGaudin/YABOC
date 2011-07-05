@@ -1,0 +1,100 @@
+\section{Scanner}
+The purpose of a scanner is to transform caracter data into symbolic data and keep only the programmaticaly usefull one (\ie only the instruction). The lexing of \brainfuck is trivial because each instruction is encoded with only one caracter. Hence the \tsl{lexing unit} have to read sequentially each caracter and return it's \gls{lexeme}.
+
+The tokens are defined as follow :
+\begin{itemize}
+	\item \ttt{TOKEN\_EOF} stands for the EOF (\ie end of string, end of stream or end of file),
+
+	\item \ttt{TOKEN\_PLUS} stands for the caracter `+',
+	\item \ttt{TOKEN\_MINUS} stands for the caracter `-',
+	\item \ttt{TOKEN\_DOT} stands for the caracter `.',
+	\item \ttt{TOKEN\_COMMA} stands for the caracter `,',
+	\item \ttt{TOKEN\_LT} stands for the caracter `<',
+	\item \ttt{TOKEN\_GT} stands for the caracter `>',
+
+	\item \ttt{TOKEN\_OTHER} stand for every other token.
+\end{itemize}
+
+\subsection{Significant lexemes\label{significantLexemes}}
+Since Brainfuck allows to put in source code any caracter, the scanner get rid of lexemes. The ones that will be kept are every token except :
+\begin{enumerate}
+	\item \ttt{TOKEN\_EOF},
+	\item and \ttt{TOKEN\_OTHER}.
+\end{enumerate}
+
+\subsection{Available methods}
+\paragraph{Constructor} 
+In a generality goal, the scanner will take a stream and therefore, allow the user to give him a string, a file, or directly the \tsl{standard input}. The constructor will keep a copy of this stream for a further use :
+
+<<Scanner : Constructor>>=
+Scanner::Scanner ( istream& inputStream ) 
+: _inputStream(inputStream)
+{ }
+@
+
+\paragraph{Next}
+This function return the next token read on the input stream. If no more token are available, the token \ttt{TOKEN\_EOF} is returned.
+
+<<Scanner: Next>>=
+Token Scanner::Next( ) {
+	char buffer[1];
+	if(_inputStream.good()) {
+		if(_inputStream.eof()) return TOKEN_EOF;
+
+		_inputStream.read(buffer, 1);
+		switch(buffer[0]) {
+			case('+'): return TOKEN_PLUS;
+			case('-'): return TOKEN_MINUS;
+				   
+			case('.'): return TOKEN_DOT;
+			case(','): return TOKEN_COMMA;
+
+			case('<'): return TOKEN_LT;
+			case('>'): return TOKEN_GT;
+
+			default: return TOKEN_OTHER;
+		}
+	} else return TOKEN_EOF;
+}
+@
+
+\subsection{Listings}
+<<Scanner : Header>>=
+#ifndef LEXER_HH
+#define LEXER_HH
+#include <istream>
+
+using namespace std;
+
+enum Token {
+	TOKEN_EOF,
+
+	TOKEN_PLUS 	= '+',
+	TOKEN_MINUS 	= '-',
+
+	TOKEN_DOT 	= '.',
+	TOKEN_COMMA 	= ',',
+
+	TOKEN_LT 	= '<',
+	TOKEN_GT 	= '>',
+
+	TOKEN_OTHER,
+};
+
+class Scanner {
+	public:
+		Scanner ( istream& inputStream);
+		Token Next ();
+
+	private:
+		istream& _inputStream;
+};
+#endif
+@
+
+<<Scanner : Implementation>>=
+#include "Scanner.hh"
+
+<<Scanner : Constructor>>
+<<Scanner: Next>>
+@

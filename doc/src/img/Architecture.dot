@@ -1,0 +1,11 @@
+digraph G{
+	node [shape=box];
+
+	Scanner->Optimizer;
+	Optimizer->CodeGenerator;
+	CodeGenerator->LLVM;
+	LLVM->Compiler;
+	Compiler->NativeCode;
+
+	NativeCode [shape=circle];
+}

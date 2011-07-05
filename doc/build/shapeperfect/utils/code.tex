@@ -1,0 +1,10 @@
+\input{../build/shapeperfect/configs/lstlisting}
+
+% \code[C++]{Nom du fichier}{Chemin du fichier}
+\newcommand{\code}[3][c++]%
+{%
+	\begin{center}%
+		\textbf{#2}%
+	\end{center}%
+	\lstinputlisting[language=#1]{#3}%
+}

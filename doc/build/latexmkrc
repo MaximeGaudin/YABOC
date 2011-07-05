@@ -1,0 +1,14 @@
+add_cus_dep('glo', 'gls', 0, 'makeglo2gls');
+sub makeglo2gls { system("makeindex -s '$_[0]'.ist -t '$_[0]'.glg -o '$_[0]'.gls '$_[0]'.glo"); }
+
+add_cus_dep('gif', 'pdf', 0, 'gif2pdf');
+sub gif2pdf { system("convert '$_[0]'.gif '$_[0]'.pdf"); }
+
+add_cus_dep('tiff', 'pdf', 0, 'tiff2pdf');
+sub tiff2pdf { system("convert '$_[0]'.tiff '$_[0]'.pdf"); }
+
+add_cus_dep('svg', 'pdf', 0, 'svg2pdf');
+sub svg2pdf { system("convert '$_[0]'.svg '$_[0]'.pdf"); }
+
+add_cus_dep('dot', 'eps', 0, 'dot2eps');
+sub dot2eps { system("dot -Teps -o '$_[0]'.eps '$_[0]'.dot"); }

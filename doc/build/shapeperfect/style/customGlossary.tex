@@ -1,0 +1,22 @@
+\addto\captionsfrench{\renewcommand*{\glossaryname}{Glossaire}}
+\addto\captionsfrench{\renewcommand*{\acronymname}{Liste des accronymes}}
+
+\newcommand{\gBox}[1]{% 
+	\shadowbox{\sffamily#1}\\\hfill\mbox{}%
+}
+
+\newglossarystyle{nation}{%
+	\renewenvironment{theglossary}{\begin{description}}{\end{description}}%
+	\renewcommand*{\glossaryheader}{}%
+	\renewcommand*{\glsgroupheading}[1]{}%
+	\renewcommand*{\glsgroupskip}{}%
+	\renewcommand*{\glossaryentryfield}[5]{%
+	\item % bullet point
+	\gBox{\glstarget{##1}{\uppercase{##2}}}% the entry name
+	\space {##3}% the description
+	\space [Page(s) ##5]\\% the number list in square brackets
+	}%
+	\renewcommand*{\glossarysubentryfield}[6]{%
+		\glossaryentryfield{##2}{##3}{##4}{##5}{##6}}%
+}
+\glossarystyle{nation}

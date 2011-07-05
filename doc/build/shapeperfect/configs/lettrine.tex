@@ -1,0 +1,10 @@
+\usepackage{lettrine}
+
+\def\texGetFirstLetter#1#2/{#1}
+\newcommand{\getFirstLetter}[1]{\texGetFirstLetter#1/}
+
+\def\texGetOtherLetters#1#2/{#2}
+\newcommand{\getOtherLetters}[1]{\texGetOtherLetters#1/}
+
+\newcommand{\Lettrine}[1]
+{\lettrine[lraise=0.11]{\textcolor[gray]{0.5}{\getFirstLetter{#1}}}{\getOtherLetters{#1}}}

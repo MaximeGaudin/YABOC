@@ -1,4 +1,11 @@
+bin/
+
 .*.swp
+
+*.cc
+*.hh
+
+*.ps
 *.pdf
 
 yaboc

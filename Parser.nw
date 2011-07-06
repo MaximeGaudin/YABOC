@@ -1,0 +1,61 @@
+\section{Parser}
+The main goal of this parser--- since only one grammar rules is necessary, is to rewrite tokens into a special structure called \gls{AST}. This \gls{AST} will help manipulate and transform source code during optimization. 
+
+\subsubsection{Syntax checking}
+The only possible syntax error is bracket unmatching. Therefore, during the \gls{AST} building, YABOC will check if the code leads to this situation.
+
+The algorithm is simple : Each opening bracket will increment a counter while each closing bracket will decrement it. When the parsing is done, the counter must be $0$, otherwise, there is bracket unmatching. 
+
+\newpar The cons with this algorithm is that the parsing need to be finished to be effective. Moreover, no hint about the unmatching bracket position can be provided to the user.
+
+\subsection{AST}
+The mother class of every node contains every structural data while child classes contain behavioral and data information. Moreover, the term \gls{AST} is abusive because every Node had, at most, one child. It will be used anyway to keep the terminology of compiler construction.
+
+<<Node : Header>>=
+#ifndef NODE_HH
+#define NODE_HH
+virtual class Node {
+	public:
+		Node();
+		~Node();
+
+		void setChild( Node* child );
+		Node* getChild( );
+
+	protected:
+		Node* _child;
+};
+#endif
+@
+
+\subsubsection{Arithmetic Node}
+This kind of node handle every arithmetic operation allowed on data pointed by \gls{DP} such as :
+\begin{itemize}
+	\item \ttt{TOKEN\_PLUS}
+	\item \ttt{TOKEN\_MINUS}
+\end{itemize}
+
+The node representing ``+'' and ``-'' have the same type because it will simplifie the optimization and especially the redundant code elimination\pref{RCE} and the code arithmetic simplification\pref{CAS}. 
+
+<<ArithmeticNode : Header>>=
+#ifndef ARITHMETIC_NODE_HH
+#define ARITHMETIC_NODE_HH
+
+enum ArithmeticOperation { 
+	PLUS 	= 1,
+	MINUS	= -1
+};
+
+class ArithmeticNode : Node {
+	public:
+		ArithmeticNode ( ArithmeticOperation operation );
+
+	private:
+		ArithmeticOperation _operation;
+};
+#endif
+@
+
+\subsubsection{Memory Node}
+
+\subsubsection{While Node}

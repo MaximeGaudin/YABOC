@@ -1,10 +1,11 @@
 COMPILER=clang++
-CFLAGS=-g -O2
+CFLAGS=-g -O2 -ansi -pedantic -Wall -Wextra 
 EXEC=yaboc
 
 .SECONDARY:
 
 all: $(EXEC) 
+
 %.hh: %.nw 
 	@echo "Extraction : $@..."
 	@notangle -R"$* : Header" $< > $@ 
@@ -21,10 +22,8 @@ $(EXEC): bin/Scanner.o bin/YABOC.o
 	@echo "Linking : $@..."
 	@$(COMPILER) $(CFLAGS) $^ -o $@
 
-doc: YABOC.pdf
-YABOC.pdf: *.nw 
+YABOC.pdf: YABOC.nw Scanner.nw Parser.nw Optimizer.nw
 	noweave -latex -n $^ > doc/src/generated.tex && cd doc/ && make && cp YABOC.pdf ..
-
 
 .PHONY: clean mrproper
 

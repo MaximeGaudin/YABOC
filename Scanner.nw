@@ -7,10 +7,15 @@ The tokens are defined as follow :
 
 	\item \ttt{TOKEN\_PLUS} stands for the caracter `+',
 	\item \ttt{TOKEN\_MINUS} stands for the caracter `-',
+
 	\item \ttt{TOKEN\_DOT} stands for the caracter `.',
 	\item \ttt{TOKEN\_COMMA} stands for the caracter `,',
+
 	\item \ttt{TOKEN\_LT} stands for the caracter `<',
 	\item \ttt{TOKEN\_GT} stands for the caracter `>',
+
+	\item \ttt{TOKEN\_OBRACKET} stands for the caracter `[',
+	\item \ttt{TOKEN\_CBRACKET} stands for the caracter `]',
 
 	\item \ttt{TOKEN\_OTHER} stand for every other token.
 \end{itemize}
@@ -52,6 +57,9 @@ Token Scanner::Next( ) {
 			case('<'): return TOKEN_LT;
 			case('>'): return TOKEN_GT;
 
+			case('['): return TOKEN_OBRACKET;
+			case(']'): return TOKEN_CBRACKET;
+
 			default: return TOKEN_OTHER;
 		}
 	} else return TOKEN_EOF;
@@ -78,7 +86,10 @@ enum Token {
 	TOKEN_LT 	= '<',
 	TOKEN_GT 	= '>',
 
-	TOKEN_OTHER,
+	TOKEN_OBRACKET 	= '[',
+	TOKEN_CBRACKET 	= ']',
+
+	TOKEN_OTHER
 };
 
 class Scanner {

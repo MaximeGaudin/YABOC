@@ -1,7 +1,8 @@
 digraph G{
 	node [shape=box];
 
-	Scanner->Optimizer;
+	Scanner->Parser;
+	Parser->Optimizer;
 	Optimizer->CodeGenerator;
 	CodeGenerator->LLVM;
 	LLVM->Compiler;

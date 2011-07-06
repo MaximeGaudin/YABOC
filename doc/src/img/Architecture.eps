@@ -2,7 +2,7 @@
 %%Creator: graphviz version 2.26.3 (20100126.1600)
 %%Title: G
 %%Pages: 1
-%%BoundingBox: 36 36 152 514
+%%BoundingBox: 36 36 152 586
 %%EndComments
 save
 %%BeginProlog
@@ -178,24 +178,57 @@ def
 %%EndSetup
 setupLatin1
 %%Page: 1 1
-%%PageBoundingBox: 36 36 152 514
+%%PageBoundingBox: 36 36 152 586
 %%PageOrientation: Portrait
 0 0 1 beginpage
 gsave
-36 36 116 478 boxprim clip newpath
+36 36 116 550 boxprim clip newpath
 1 1 set_scale 0 rotate 40 41 translate
 % Scanner
 gsave
 1 setlinewidth
 0 0 0 nodecolor
-newpath 85 470 moveto
-23 470 lineto
-23 434 lineto
-85 434 lineto
+newpath 85 542 moveto
+23 542 lineto
+23 506 lineto
+85 506 lineto
 closepath stroke
 0 0 0 nodecolor
 14 /Times-Roman set_font
-30.5 446.9 moveto 47 (Scanner) alignedtext
+30.5 518.9 moveto 47 (Scanner) alignedtext
+grestore
+% Parser
+gsave
+1 setlinewidth
+0 0 0 nodecolor
+newpath 81 470 moveto
+27 470 lineto
+27 434 lineto
+81 434 lineto
+closepath stroke
+0 0 0 nodecolor
+14 /Times-Roman set_font
+35.5 446.9 moveto 37 (Parser) alignedtext
+grestore
+% Scanner->Parser
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 54 505.83 moveto
+54 498.13 54 488.97 54 480.42 curveto
+stroke
+0 0 0 edgecolor
+newpath 57.5 480.41 moveto
+54 470.41 lineto
+50.5 480.41 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 57.5 480.41 moveto
+54 470.41 lineto
+50.5 480.41 lineto
+closepath stroke
 grestore
 % Optimizer
 gsave
@@ -210,7 +243,7 @@ closepath stroke
 14 /Times-Roman set_font
 25 374.9 moveto 58 (Optimizer) alignedtext
 grestore
-% Scanner->Optimizer
+% Parser->Optimizer
 gsave
 1 setlinewidth
 0 0 0 edgecolor

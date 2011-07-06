@@ -5,6 +5,7 @@
 	\item getting familiar with code optimization,
 	\item getting familiar with code generation via \tsl{LLVM}.
 \end{enumerate}
+
 The main feature is to generate optimized (without the LLVM engine$\ldots$) native code from Brainfuck source code but the program can also :
 \begin{itemize}
 	\item Display the preprocessed\pref{significantLexemes} Brainfuck source code,
@@ -12,7 +13,7 @@ The main feature is to generate optimized (without the LLVM engine$\ldots$) nati
 	\item And display the generated LLVM bytecode.
 \end{itemize}
 
-\newpar Obviously, I do not attempt to be the reference Brainfuck compiler (especially since many exist yet !) but I will try to program in the most generic way. For this purpose, I will only use standard tools such as :
+\newpar Obviously, I do not attempt to develop the reference Brainfuck compiler (especially since many exist yet !) but I will try to code in the most generic way. For this purpose, I will only use standard tools such as :
 \begin{itemize}
 	\item \tbf{Make} for build pipeline,
 	\item \tbf{C++ ANSI 99} as programming language,
@@ -27,8 +28,9 @@ The architecture of \gls{YABOC} if fairly simple since it's pipeline is linear (
 \image[Architecture of YABOC]{img/Architecture.eps}{.2}
 It's composed by :
 \begin{itemize}
-	\item The parser, which read every caracter, transform into \gls{lexeme} and keep only the significant ones\pref{significantLexemes}.
-	\item The optimizer, which transform succession of lexemes into a better efficient one\pref{optimizations}.
+	\item The scanner, which read every caracter, transform into \gls{lexeme} and keep only the significant ones\pref{significantLexemes}.
+	\item The parser, which generate \gls{IL} from tokens.
+	\item The optimizer, which transform \gls{IL} into a better efficient form\pref{optimizations}.
 	\item The code generator, which interpret every lexemes to it's LLVM representation.
 	\item The LLVM, which generate the byte code.
 	\item The compiler, which generate the native code.

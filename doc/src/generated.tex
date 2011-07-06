@@ -1,4 +1,92 @@
-\nwfilename{Scanner.nw}\nwbegindocs{0}\section{Scanner}% ===> this file was generated automatically by noweave --- better not edit it
+\nwfilename{YABOC.nw}\nwbegindocs{0}\section{YABOC}% ===> this file was generated automatically by noweave --- better not edit it
+\gls{YABOC} is a toy project with three main goals :
+\begin{enumerate}
+        \item Getting familiar with \tsl{literate programming},
+        \item getting familiar with code optimization,
+        \item getting familiar with code generation via \tsl{LLVM}.
+\end{enumerate}
+
+The main feature is to generate optimized (without the LLVM engine$\ldots$) native code from Brainfuck source code but the program can also :
+\begin{itemize}
+        \item Display the preprocessed\pref{significantLexemes} Brainfuck source code,
+        \item Display the optimized Brainfuck source code,
+        \item And display the generated LLVM bytecode.
+\end{itemize}
+
+\newpar Obviously, I do not attempt to develop the reference Brainfuck compiler (especially since many exist yet !) but I will try to code in the most generic way. For this purpose, I will only use standard tools such as :
+\begin{itemize}
+        \item \tbf{Make} for build pipeline,
+        \item \tbf{C++ ANSI 99} as programming language,
+        \item \tbf{\LaTeX} as typesetting language,
+        \item \tbf{CLang++} as compiler (which can be switch to g++ without code modification),
+        \item \tbf{LLVM} as code generator,
+        \item and \tbf{Weave} \& \tbf{Tangle} as code dispatchers.
+\end{itemize}
+
+\subsection{Architecture}
+The architecture of \gls{YABOC} if fairly simple since it's pipeline is linear (\cf \fref{fig1}).
+\image[Architecture of YABOC]{img/Architecture.eps}{.2}
+It's composed by :
+\begin{itemize}
+        \item The scanner, which read every caracter, transform into \gls{lexeme} and keep only the significant ones\pref{significantLexemes}.
+        \item The parser, which generate \gls{IL} from tokens.
+        \item The optimizer, which transform \gls{IL} into a better efficient form\pref{optimizations}.
+        \item The code generator, which interpret every lexemes to it's LLVM representation.
+        \item The LLVM, which generate the byte code.
+        \item The compiler, which generate the native code.
+\end{itemize}
+
+\newpar Each stage is detailed in the following document.
+
+\subsection{Features}
+\subsubsection{Argument handler}
+\nwenddocs{}\nwbegincode{1}\moddef{YABOC : ArgumentHandler}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+void ArgumentHandler(int argc, char** argv, bool* optPreprocess) \{
+        *optPreprocess = true;
+\}
+\nwendcode{}\nwbegindocs{2}\nwdocspar
+
+\subsubsection{Preprocessing}
+The preprocessing feature display the kept tokens one following another from the input stream. Because the token out of the scanner are already known to be valid, the method only output the result of {\Tt{}Scanner\ :\ Next\nwendquote}. After the display of all available tokens, a carriage return is printed.
+
+\newpar If the option was the only specified, the program exits. Otherwise, the other options are handled.
+
+\nwenddocs{}\nwbegincode{3}\moddef{YABOC : DisplayPreprocessStream}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+void DisplayPreprocessStream ( Scanner& scanner ) \{
+        char buffer = scanner.Next();
+        while(buffer != TOKEN_EOF) \{
+                if(buffer != TOKEN_OTHER) cout << buffer;
+                buffer = scanner.Next();
+        \}
+        cout << endl;
+\}
+\nwendcode{}\nwbegindocs{4}\nwdocspar
+
+\subsection{Listing}
+\nwenddocs{}\nwbegincode{5}\moddef{YABOC : Implementation}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+#include <iostream>
+#include "Scanner.hh"
+
+using namespace std;
+
+\LA{}YABOC : DisplayPreprocessStream\RA{}
+
+\LA{}YABOC : ArgumentHandler\RA{}
+
+int main (int argc, char** argv) \{
+        bool optPreprocess = false;
+        ArgumentHandler(argc, argv, &optPreprocess);    
+
+        Scanner scanner(cin);
+        if(optPreprocess) DisplayPreprocessStream(scanner);
+
+        return 0;
+\}
+\nwendcode{}\nwbegindocs{6}\nwdocspar
+
+\nwenddocs{}\nwbegincode{7}\moddef{YABOC : Header}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+\nwendcode{}\nwbegindocs{8}\nwdocspar
+\nwenddocs{}\nwfilename{Scanner.nw}\nwbegindocs{0}\section{Scanner}
 The purpose of a scanner is to transform caracter data into symbolic data and keep only the programmaticaly usefull one (\ie only the instruction). The lexing of \brainfuck is trivial because each instruction is encoded with only one caracter. Hence the \tsl{lexing unit} have to read sequentially each caracter and return it's \gls{lexeme}.
 
 The tokens are defined as follow :
@@ -78,7 +166,7 @@ enum Token \{
         TOKEN_LT        = '<',
         TOKEN_GT        = '>',
 
-        TOKEN_OTHER,
+        TOKEN_OTHER
 \};
 
 class Scanner \{
@@ -98,90 +186,73 @@ class Scanner \{
 \LA{}Scanner : Constructor\RA{}
 \LA{}Scanner: Next\RA{}
 \nwendcode{}\nwbegindocs{8}\nwdocspar
-\nwenddocs{}\nwfilename{YABOC.nw}\nwbegindocs{0}\section{YABOC}
-\gls{YABOC} is a toy project with three main goals :
-\begin{enumerate}
-        \item Getting familiar with \tsl{literate programming},
-        \item getting familiar with code optimization,
-        \item getting familiar with code generation via \tsl{LLVM}.
-\end{enumerate}
-The main feature is to generate optimized (without the LLVM engine$\ldots$) native code from Brainfuck source code but the program can also :
-\begin{itemize}
-        \item Display the preprocessed\pref{significantLexemes} Brainfuck source code,
-        \item Display the optimized Brainfuck source code,
-        \item And display the generated LLVM bytecode.
-\end{itemize}
+\nwenddocs{}\nwfilename{Parser.nw}\nwbegindocs{0}\section{Parser}
+The main goal of this parser--- since only one grammar rules is necessary, is to rewrite tokens into a special structure called \gls{AST}. This \gls{AST} will help manipulate and transform source code during optimization. 
 
-\newpar Obviously, I do not attempt to be the reference Brainfuck compiler (especially since many exist yet !) but I will try to program in the most generic way. For this purpose, I will only use standard tools such as :
-\begin{itemize}
-        \item \tbf{Make} for build pipeline,
-        \item \tbf{C++ ANSI 99} as programming language,
-        \item \tbf{\LaTeX} as typesetting language,
-        \item \tbf{CLang++} as compiler (which can be switch to g++ without code modification),
-        \item \tbf{LLVM} as code generator,
-        \item and \tbf{Weave} \& \tbf{Tangle} as code dispatchers.
-\end{itemize}
+\subsubsection{Syntax checking}
+The only possible syntax error is bracket unmatching. Therefore, during the \gls{AST} building, YABOC will check if the code leads to this situation.
 
-\subsection{Architecture}
-The architecture of \gls{YABOC} if fairly simple since it's pipeline is linear (\cf \fref{fig1}).
-\image[Architecture of YABOC]{img/Architecture.eps}{.2}
-It's composed by :
-\begin{itemize}
-        \item The parser, which read every caracter, transform into \gls{lexeme} and keep only the significant ones\pref{significantLexemes}.
-        \item The optimizer, which transform succession of lexemes into a better efficient one\pref{optimizations}.
-        \item The code generator, which interpret every lexemes to it's LLVM representation.
-        \item The LLVM, which generate the byte code.
-        \item The compiler, which generate the native code.
-\end{itemize}
+The algorithm is simple : Each opening bracket will increment a counter while each closing bracket will decrement it. When the parsing is done, the counter must be $0$, otherwise, there is bracket unmatching. 
 
-\newpar Each stage is detailed in the following document.
+\newpar The cons with this algorithm is that the parsing need to be finished to be effective. Moreover, no hint about the unmatching bracket position can be provided to the user.
 
-\subsection{Features}
-\subsubsection{Argument handler}
-\nwenddocs{}\nwbegincode{1}\moddef{YABOC : ArgumentHandler}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
-void ArgumentHandler(int argc, char** argv, bool* optPreprocess) \{
-        *optPreprocess = true;
-\}
+\subsection{AST}
+The mother class of every node contains every structural data while child classes contain behavioral and data information. Moreover, the term \gls{AST} is abusive because every Node had, at most, one child. It will be used anyway to keep the terminology of compiler construction.
+
+\nwenddocs{}\nwbegincode{1}\moddef{Node : Header}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+#ifndef NODE_HH
+#define NODE_HH
+virtual class Node \{
+        public:
+                Node();
+                ~Node();
+
+                void setChild( Node* child );
+                Node* getChild( );
+
+        protected:
+                Node* _child;
+\};
+#endif
 \nwendcode{}\nwbegindocs{2}\nwdocspar
 
-\subsubsection{Preprocessing}
-The preprocessing feature display the kept tokens one following another from the input stream. Because the token out of the scanner are already known to be valid, the method only output the result of {\Tt{}Scanner\ :\ Next\nwendquote}. After the display of all available tokens, a carriage return is printed.
+\subsubsection{Arithmetic Node}
+This kind of node handle every arithmetic operation allowed on data pointed by \gls{DP} such as :
+\begin{itemize}
+        \item \ttt{TOKEN\_PLUS}
+        \item \ttt{TOKEN\_MINUS}
+\end{itemize}
 
-\newpar If the option was the only specified, the program exits. Otherwise, the other options are handled.
+The node representing ``+'' and ``-'' have the same type because it will simplifie the optimization and especially the redundant code elimination\pref{RCE} and the code arithmetic simplification\pref{CAS}. 
 
-\nwenddocs{}\nwbegincode{3}\moddef{YABOC : DisplayPreprocessStream}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
-void DisplayPreprocessStream ( Scanner& scanner ) \{
-        char buffer = scanner.Next();
-        while(buffer != TOKEN_EOF) \{
-                if(buffer != TOKEN_OTHER) cout << buffer;
-                buffer = scanner.Next();
-        \}
-        cout << endl;
-\}
+\nwenddocs{}\nwbegincode{3}\moddef{ArithmeticNode : Header}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+#ifndef ARITHMETIC_NODE_HH
+#define ARITHMETIC_NODE_HH
+
+enum ArithmeticOperation \{ 
+        PLUS    = 1,
+        MINUS   = -1
+\};
+
+class ArithmeticNode : Node \{
+        public:
+                ArithmeticNode ( ArithmeticOperation operation );
+
+        private:
+                ArithmeticOperation _operation;
+\};
+#endif
 \nwendcode{}\nwbegindocs{4}\nwdocspar
+\subsubsection{While Node}
+\nwenddocs{}\nwfilename{Optimizer.nw}\nwbegindocs{0}\section{Optimizer}
 
-\subsection{Listing}
-\nwenddocs{}\nwbegincode{5}\moddef{YABOC : Implementation}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
-#include <iostream>
-#include "Scanner.hh"
+\subsection{Redundant code elimination\label{RCE}}
+The first optimization pass eliminates basics redundant code such as \ttt{+++++}. This kind of instructions will be replaced by the semantic equivalent \ttt{5+}.
 
-using namespace std;
+Obviously, this optimization is available for head shift methods.
 
-\LA{}YABOC : DisplayPreprocessStream\RA{}
+\subsection{Code arithmetic simplification\label{CAS}}
+After the first pass, code such as \ttt{4+5-} can results. This is simplified and replace by \ttt{-}.
 
-\LA{}YABOC : ArgumentHandler\RA{}
-
-int main (int argc, char** argv) \{
-        bool optPreprocess = false;
-        ArgumentHandler(argc, argv, &optPreprocess);    
-
-        Scanner scanner(cin);
-        if(optPreprocess) DisplayPreprocessStream(scanner);
-
-        return 0;
-\}
-\nwendcode{}\nwbegindocs{6}\nwdocspar
-
-\nwenddocs{}\nwbegincode{7}\moddef{YABOC : Header}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
-\nwendcode{}\nwbegindocs{8}\nwdocspar
+Obviously, this optimization is available for head shift methods.
 \nwenddocs{}

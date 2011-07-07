@@ -1,5 +1,5 @@
 COMPILER=clang++
-CFLAGS=-g -O2 -pedantic -Wall -Wextra 
+CFLAGS=-g -O2 -pedantic -Wall -Wextra -Weffc++
 EXEC=yaboc
 
 .SECONDARY:

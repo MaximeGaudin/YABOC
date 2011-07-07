@@ -28,14 +28,16 @@ virtual class Node {
 #endif
 @
 
-\subsubsection{Arithmetic Node}
+\subsubsection{Arithmetic node}
 This kind of node handle every arithmetic operation allowed on data pointed by \gls{DP} such as :
 \begin{itemize}
 	\item \ttt{TOKEN\_PLUS}
 	\item \ttt{TOKEN\_MINUS}
 \end{itemize}
 
-The node representing ``+'' and ``-'' have the same type because it will simplifie the optimization and especially the redundant code elimination\pref{RCE} and the code arithmetic simplification\pref{CAS}. 
+Moreover, the instance of \ttt{ArithmeticNode} keep a compositional cardinality, \ie the number of time the operator has to be applied.
+
+\remark{The node representing ``+'' and ``-'' have the same type because it will simplifie the optimization and especially the redundant code elimination\pref{RCE} and the arithmetic simplification\pref{AS}.}
 
 <<ArithmeticNode : Header>>=
 #ifndef ARITHMETIC_NODE_HH
@@ -56,6 +58,8 @@ class ArithmeticNode : Node {
 #endif
 @
 
-\subsubsection{Memory Node}
+\subsubsection{Memory node}
+
+\subsubsection{I/O node}
 
 \subsubsection{While Node}

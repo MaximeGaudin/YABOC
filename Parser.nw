@@ -47,7 +47,6 @@ Moreover, the instance of \ttt{ArithmeticNode} keep a compositional cardinality,
 #define ARITHMETIC_NODE_HH
 #include "Node.hh"
 
-
 class ArithmeticNode : Node {
 	public:
 		enum ArithmeticOperation { 
@@ -100,3 +99,4 @@ unsigned int ArithmeticNode::getCardinality ( ) { return _operation; }
 \subsubsection{I/O node}
 
 \subsubsection{While Node}
+This node is very particular since it's the only one to contain other nodes. 

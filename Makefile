@@ -7,18 +7,32 @@ EXEC=yaboc
 all: $(EXEC) 
 
 %.hh: %.nw 
-	@echo "Extraction : $@..."
+	@echo "Extracting : $@..."
 	@notangle -R"$* : Header" $< > $@ 
 
 %.cc: %.nw
-	@echo "Extraction : $@..."
+	@echo "Extracting : $@..."
 	@notangle -R"$* : Implementation" $< > $@
 
 bin/%.o: %.cc %.hh
-	@echo "Compilation : $@...\n"
+	@echo "Compiling : $@...\n"
 	@$(COMPILER) -c $(CFLAGS) -o $@ $< 
 
-$(EXEC): bin/Scanner.o bin/Node.o bin/ArithmeticNode.o bin/YABOC.o
+# NODES --------------------------------------------------
+nodes/%.hh: Parser.nw 
+	@echo "Extracting : $@..."
+	@notangle -R"$* : Header" $< > $@ 
+
+nodes/%.cc: Parser.nw
+	@echo "Extracting : $@..."
+	@notangle -R"$* : Implementation" $< > $@
+
+bin/nodes/%.o: nodes/%.cc nodes/%.hh
+	@echo "Compiling : $@...\n"
+	@$(COMPILER) -c $(CFLAGS) -o $@ $< 
+#---------------------------------------------------------
+
+$(EXEC): bin/Scanner.o bin/nodes/Node.o bin/nodes/ArithmeticNode.o bin/YABOC.o
 	@echo "Linking : $@..."
 	@$(COMPILER) $(CFLAGS) $^ -o $@
 
@@ -28,24 +42,9 @@ YABOC.pdf: YABOC.nw Scanner.nw Parser.nw Optimizer.nw
 .PHONY: clean mrproper
 
 clean:
-	@rm -rf *.cc *.hh
-	@rm -rf bin/*.o >/dev/null
+	@rm -rf *.cc *.hh nodes/*.cc nodes/*.hh >/dev/null
+	@rm -rf bin/*.o bin/nodes/*.o >/dev/null
 
 mrproper: clean
 	@rm -rf *.pdf
 	@rm -rf $(EXEC) >/dev/null
-
-#-------------------------------------------------------------------------------------------
-Node.cc: Parser.nw
-	@echo "Extraction : $@..."
-	@notangle -R"$* : Implementation" $< > $@
-Node.hh: Parser.nw
-	@echo "Extraction : $@..."
-	@notangle -R"Node : Header" $< > $@ 
-
-ArithmeticNode.cc: Parser.nw
-	@echo "Extraction : $@..."
-	@notangle -R"$* : Implementation" $< > $@
-ArithmeticNode.hh: Parser.nw
-	@echo "Extraction : $@..."
-	@notangle -R"ArithmeticNode : Header" $< > $@ 

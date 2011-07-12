@@ -1,5 +1,5 @@
 \section{Scanner}
-The purpose of a scanner is to transform caracter data into symbolic data and keep only the programmaticaly usefull one (\ie only the instruction). The lexing of \brainfuck is trivial because each instruction is encoded with only one caracter. Hence the \tsl{lexing unit} have to read sequentially each caracter and return it's \gls{lexeme}.
+The purpose of a scanner is to transform caracter data into symbolic data and keep only the programmaticaly usefull one (\ie only the instruction). The lexing of \brainfuck is trivial because each instruction is encoded with only one caracter. Hence the \tsl{lexing unit} have to read sequentially each caracter and return it's \gls{lexeme}. Because the scanner uses a stream to read characters, when all characters are read, there's no way to recover them if they were not saved.
 
 The tokens are defined as follow :
 \begin{itemize}

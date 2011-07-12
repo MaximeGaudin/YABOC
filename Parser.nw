@@ -6,30 +6,33 @@ The only possible syntax error is bracket unmatching. Therefore, during the \gls
 
 The algorithm is simple : Each opening bracket will increment a counter while each closing bracket will decrement it. When the parsing is done, the counter must be $0$, otherwise, there is bracket unmatching. 
 
-\newpar The cons with this algorithm is that the parsing need to be finished to be effective. Moreover, no hint about the unmatching bracket position can be provided to the user.
+\remark{The cons with this algorithm is that the parsing need to be finished to be effective. Moreover, no hint about the unmatching bracket position can be provided to the user.}
 
 \subsection{AST}
-The mother class of every node contains every structural data while child classes contain behavioral and data information. Moreover, the term \gls{AST} is abusive because every Node had, at most, one child. It will be used anyway to keep the terminology of compiler construction.
+The mother class of every node contains no data while child classes contain behavioral and data information. Moreover, the term \gls{AST} is abusive because every Node are stored into a vector and had, at most, one child list. It will be used anyway to keep the terminology of compiler construction.
 
+\newpar The classe is defined by the following header 
 <<Node : Header>>=
 #ifndef NODE_HH
 #define NODE_HH
-virtual class Node {
+class Node {
 	public:
 		Node();
 		~Node();
-
-		void setChild( Node* child );
-		Node* getChild( );
-
-	protected:
-		Node* _child;
 };
 #endif
 @
 
+which is implemented by
+<<Node : Implementation>>=
+#include "Node.hh"
+
+Node::Node() {}
+Node::~Node() { }
+@
+
 \subsubsection{Arithmetic node}
-This kind of node handle every arithmetic operation allowed on data pointed by \gls{DP} such as :
+This kind of node handle every arithmetic operations allowed on data pointed by the \gls{DP} such as :
 \begin{itemize}
 	\item \ttt{TOKEN\_PLUS}
 	\item \ttt{TOKEN\_MINUS}
@@ -42,20 +45,54 @@ Moreover, the instance of \ttt{ArithmeticNode} keep a compositional cardinality,
 <<ArithmeticNode : Header>>=
 #ifndef ARITHMETIC_NODE_HH
 #define ARITHMETIC_NODE_HH
+#include "Node.hh"
 
-enum ArithmeticOperation { 
-	PLUS 	= 1,
-	MINUS	= -1
-};
 
 class ArithmeticNode : Node {
 	public:
-		ArithmeticNode ( ArithmeticOperation operation );
+		enum ArithmeticOperation { 
+			PLUS 	= 1,
+			MINUS	= -1
+		};
 
+		ArithmeticNode ( ArithmeticOperation operation, int cardinality );
+		
+		void addOperation ( ArithmeticOperation operation );
+
+		ArithmeticOperation getOperation( );
+		unsigned int getCardinality ( );
 	private:
-		ArithmeticOperation _operation;
+		int _operation;
 };
 #endif
+@
+
+Beside the getters, this class contains the \ttt{addOperation} method.
+
+\paragraph{\ttt{addOperation}}
+This method is used to deal easily with the arithmetic simplification simply by ``adding'' operation to the current one. As implemented bellow, the value of the given operation is added to the current value.
+<<ArithmeticNode : addOperation>>=
+void ArithmeticNode::addOperation ( ArithmeticNode::ArithmeticOperation operation ) {
+	_operation += (int)operation;
+}
+@
+
+\paragraph{Implementation}
+<<ArithmeticNode : Implementation>>=
+#include "ArithmeticNode.hh"
+
+ArithmeticNode::ArithmeticNode ( ArithmeticNode::ArithmeticOperation operation, int cardinality = 1) {
+	_operation = (int)operation * cardinality;
+}
+
+<<ArithmeticNode : addOperation>>
+
+// Getters & setters
+ArithmeticNode::ArithmeticOperation ArithmeticNode::getOperation( ) {
+	if(_operation < 0) return ArithmeticNode::MINUS;
+	return ArithmeticNode::PLUS;
+}
+unsigned int ArithmeticNode::getCardinality ( ) { return _operation; }
 @
 
 \subsubsection{Memory node}

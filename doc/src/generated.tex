@@ -9,19 +9,20 @@
 To fill this goals, I created a program to generate optimized\footnote{Before LLVM optimized it} native code from Brainfuck code. The program can also :
 \begin{itemize}
         \item Display the preprocessed\pref{significantLexemes} Brainfuck source code,
-        \item Display the optimized Brainfuck (at different stages) source code,
-        \item And display the generated LLVM bytecode.
+        \item display the optimized Brainfuck (at different stages) source code,
+        \item and display the generated LLVM bytecode.
 \end{itemize}
 
 \paragraph{Tools} 
 Obviously, I do not attempt to develop the reference Brainfuck compiler (especially since many exist yet !) but I will try to code in the most generic way. For this purpose, I will only use standard tools such as :
 \begin{itemize}
-        \item \tbf{Make} for build pipeline,
+        \item \tbf{TCLAP} for command line arguments parsing
+        \item \tbf{make} for build pipeline,
         \item \tbf{C++} as programming language,
         \item \tbf{\LaTeX} as typesetting language,
         \item \tbf{CLang++} as compiler (which can be switch to g++ without code modification),
         \item \tbf{LLVM} as code generator,
-        \item and \tbf{Weave} \& \tbf{Tangle} as code dispatchers.
+        \item and \tbf{weave} \& \tbf{tangle} as code dispatchers.
 \end{itemize}
 
 \subsection{Architecture}
@@ -41,10 +42,52 @@ It's composed by :
 
 \subsection{Features}
 \subsubsection{Argument handler}
-\TODO{}
+To choose which feature to enable and which feature to disable, the program need a the argument handler to translate the command arguments to values that YABOC could manage easily. To perform this task, YABOC uses a well-done and well-documented library called TCALP\footnote{\cf \url{http://tclap.sourceforge.net/} for further information.}.
+
+There is two types of arguments :
+\begin{itemize}
+        \item Switches, wich enable or disable features
+        \item Values, which parametrize a particular behavior of the program
+\end{itemize}
+
+\paragraph{Switches} 
+The following switches are available :
+\begin{itemize}
+        \item \ttt{-p / --preprocess} : If set, the program will display the preprocessed stream of BF code. It not, the program do nothing concerning preprocessed stream.
+\end{itemize}
+
+\paragraph{Values}
+The following values can be set :
+\begin{itemize}
+        \item \ttt{-i / --input} : If set, the value will be used to read the brainfuck code from. The program will also check that the file exists. If not, the standard input is return as input stream.
+\end{itemize}
+
 \nwenddocs{}\nwbegincode{1}\moddef{YABOC : ArgumentHandler}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
-void ArgumentHandler(int argc, char** argv, bool* optPreprocess) \{
-        *optPreprocess = true;
+istream& ArgumentHandler(int argc, char** argv, bool* optPreprocess) \{
+        // Set default values
+        *optPreprocess = false;
+
+        try \{
+                TCLAP::CmdLine cmd("YABOC, Yet Another Brainfuck Optimizer & Compiler.", ' ', VERSION_NUMBER);
+
+                TCLAP::ValueArg<std::string> inputArg("i","input","Input file to read the brainfuck code from.", false, "","filename");
+                TCLAP::SwitchArg pSwitch("p","preprocessed","Display the preprocessed stream.", cmd, false);
+
+                cmd.add (inputArg);
+                cmd.parse ( argc, argv );
+
+                *optPreprocess = pSwitch.getValue();
+                if(inputArg.getValue() == "") return cin;
+                else \{
+                        ifstream* inputFileStream = new ifstream(inputArg.getValue().c_str());
+                        if(*inputFileStream) return *inputFileStream;
+                        cerr << "Error: File not found." << endl;
+                \}
+        \} catch (TCLAP::ArgException &e) \{
+                cerr << "Error: " << e.error() << " for arg " << e.argId() << endl; 
+        \}
+
+        return cin;
 \}
 \nwendcode{}\nwbegindocs{2}\nwdocspar
 
@@ -66,8 +109,13 @@ void DisplayPreprocessStream ( Scanner& scanner ) \{
 
 \subsection{Listing}
 \nwenddocs{}\nwbegincode{5}\moddef{YABOC : Implementation}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+#include <string>
 #include <iostream>
+#include <fstream>
+#include <tclap/CmdLine.h>
 #include "Scanner.hh"
+
+#define VERSION_NUMBER "0.1" 
 
 using namespace std;
 
@@ -77,9 +125,9 @@ using namespace std;
 
 int main (int argc, char** argv) \{
         bool optPreprocess = false;
-        ArgumentHandler(argc, argv, &optPreprocess);    
+        istream& inputStream = ArgumentHandler(argc, argv, &optPreprocess);     
 
-        Scanner scanner(cin);
+        Scanner scanner(inputStream);
         if(optPreprocess) DisplayPreprocessStream(scanner);
 
         return 0;
@@ -89,7 +137,7 @@ int main (int argc, char** argv) \{
 \nwenddocs{}\nwbegincode{7}\moddef{YABOC : Header}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
 \nwendcode{}\nwbegindocs{8}\nwdocspar
 \nwenddocs{}\nwfilename{Scanner.nw}\nwbegindocs{0}\section{Scanner}
-The purpose of a scanner is to transform caracter data into symbolic data and keep only the programmaticaly usefull one (\ie only the instruction). The lexing of \brainfuck is trivial because each instruction is encoded with only one caracter. Hence the \tsl{lexing unit} have to read sequentially each caracter and return it's \gls{lexeme}.
+The purpose of a scanner is to transform caracter data into symbolic data and keep only the programmaticaly usefull one (\ie only the instruction). The lexing of \brainfuck is trivial because each instruction is encoded with only one caracter. Hence the \tsl{lexing unit} have to read sequentially each caracter and return it's \gls{lexeme}. Because the scanner uses a stream to read characters, when all characters are read, there's no way to recover them if they were not saved.
 
 The tokens are defined as follow :
 \begin{itemize}
@@ -207,30 +255,33 @@ The only possible syntax error is bracket unmatching. Therefore, during the \gls
 
 The algorithm is simple : Each opening bracket will increment a counter while each closing bracket will decrement it. When the parsing is done, the counter must be $0$, otherwise, there is bracket unmatching. 
 
-\newpar The cons with this algorithm is that the parsing need to be finished to be effective. Moreover, no hint about the unmatching bracket position can be provided to the user.
+\remark{The cons with this algorithm is that the parsing need to be finished to be effective. Moreover, no hint about the unmatching bracket position can be provided to the user.}
 
 \subsection{AST}
-The mother class of every node contains every structural data while child classes contain behavioral and data information. Moreover, the term \gls{AST} is abusive because every Node had, at most, one child. It will be used anyway to keep the terminology of compiler construction.
+The mother class of every node contains no data while child classes contain behavioral and data information. Moreover, the term \gls{AST} is abusive because every Node are stored into a vector and had, at most, one child list. It will be used anyway to keep the terminology of compiler construction.
 
+\newpar The classe is defined by the following header 
 \nwenddocs{}\nwbegincode{1}\moddef{Node : Header}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
 #ifndef NODE_HH
 #define NODE_HH
-virtual class Node \{
+class Node \{
         public:
                 Node();
                 ~Node();
-
-                void setChild( Node* child );
-                Node* getChild( );
-
-        protected:
-                Node* _child;
 \};
 #endif
 \nwendcode{}\nwbegindocs{2}\nwdocspar
 
+which is implemented by
+\nwenddocs{}\nwbegincode{3}\moddef{Node : Implementation}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+#include "Node.hh"
+
+Node::Node() \{\}
+Node::~Node() \{ \}
+\nwendcode{}\nwbegindocs{4}\nwdocspar
+
 \subsubsection{Arithmetic node}
-This kind of node handle every arithmetic operation allowed on data pointed by \gls{DP} such as :
+This kind of node handle every arithmetic operations allowed on data pointed by the \gls{DP} such as :
 \begin{itemize}
         \item \ttt{TOKEN\_PLUS}
         \item \ttt{TOKEN\_MINUS}
@@ -240,24 +291,58 @@ Moreover, the instance of \ttt{ArithmeticNode} keep a compositional cardinality,
 
 \remark{The node representing ``+'' and ``-'' have the same type because it will simplifie the optimization and especially the redundant code elimination\pref{RCE} and the arithmetic simplification\pref{AS}.}
 
-\nwenddocs{}\nwbegincode{3}\moddef{ArithmeticNode : Header}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{5}\moddef{ArithmeticNode : Header}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
 #ifndef ARITHMETIC_NODE_HH
 #define ARITHMETIC_NODE_HH
+#include "Node.hh"
 
-enum ArithmeticOperation \{ 
-        PLUS    = 1,
-        MINUS   = -1
-\};
 
 class ArithmeticNode : Node \{
         public:
-                ArithmeticNode ( ArithmeticOperation operation );
+                enum ArithmeticOperation \{ 
+                        PLUS    = 1,
+                        MINUS   = -1
+                \};
 
+                ArithmeticNode ( ArithmeticOperation operation, int cardinality );
+                
+                void addOperation ( ArithmeticOperation operation );
+
+                ArithmeticOperation getOperation( );
+                unsigned int getCardinality ( );
         private:
-                ArithmeticOperation _operation;
+                int _operation;
 \};
 #endif
-\nwendcode{}\nwbegindocs{4}\nwdocspar
+\nwendcode{}\nwbegindocs{6}\nwdocspar
+
+Beside the getters, this class contains the \ttt{addOperation} method.
+
+\paragraph{\ttt{addOperation}}
+This method is used to deal easily with the arithmetic simplification simply by ``adding'' operation to the current one. As implemented bellow, the value of the given operation is added to the current value.
+\nwenddocs{}\nwbegincode{7}\moddef{ArithmeticNode : addOperation}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+void ArithmeticNode::addOperation ( ArithmeticNode::ArithmeticOperation operation ) \{
+        _operation += (int)operation;
+\}
+\nwendcode{}\nwbegindocs{8}\nwdocspar
+
+\paragraph{Implementation}
+\nwenddocs{}\nwbegincode{9}\moddef{ArithmeticNode : Implementation}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+#include "ArithmeticNode.hh"
+
+ArithmeticNode::ArithmeticNode ( ArithmeticNode::ArithmeticOperation operation, int cardinality = 1) \{
+        _operation = (int)operation * cardinality;
+\}
+
+\LA{}ArithmeticNode : addOperation\RA{}
+
+// Getters & setters
+ArithmeticNode::ArithmeticOperation ArithmeticNode::getOperation( ) \{
+        if(_operation < 0) return ArithmeticNode::MINUS;
+        return ArithmeticNode::PLUS;
+\}
+unsigned int ArithmeticNode::getCardinality ( ) \{ return _operation; \}
+\nwendcode{}\nwbegindocs{10}\nwdocspar
 
 \subsubsection{Memory node}
 

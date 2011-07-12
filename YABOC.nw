@@ -42,10 +42,52 @@ It's composed by :
 
 \subsection{Features}
 \subsubsection{Argument handler}
-\TODO{}
+The argument handler translate the command argument to values that YABOC could manage easily. 
+
+There is two types of arguments :
+\begin{itemize}
+	\item Switches, wich enable or disable features
+	\item Values, which parametrize a particular behavior of the program
+\end{itemize}
+
+\paragraph{Switches} 
+The following switches are available :
+\begin{itemize}
+	\item \ttt{-p / --preprocess} : If set, the program will display the preprocessed stream of BF code.
+\end{itemize}
+
+\paragraph{Values}
+The following values can be set :
+\begin{itemize}
+	\item \ttt{-i / --input} : If set, the value will be used to read the brainfuck code from. The program will also check that the file exists.
+\end{itemize}
+
 <<YABOC : ArgumentHandler>>=
-void ArgumentHandler(int argc, char** argv, bool* optPreprocess) {
-	*optPreprocess = true;
+istream& ArgumentHandler(int argc, char** argv, bool* optPreprocess) {
+	// Set default values
+	*optPreprocess = false;
+
+	try {
+		TCLAP::CmdLine cmd("YABOC, Yet Another Brainfuck Optimizer & Compiler.", ' ', VERSION_NUMBER);
+
+		TCLAP::ValueArg<std::string> inputArg("i","input","Input file to read the brainfuck code from.", false, "","filename");
+		TCLAP::SwitchArg pSwitch("p","preprocessed","Display the preprocessed stream.", cmd, false);
+
+		cmd.add (inputArg);
+		cmd.parse ( argc, argv );
+
+		*optPreprocess = pSwitch.getValue();
+		if(inputArg.getValue() == "") return cin;
+		else {
+			ifstream* inputFileStream = new ifstream(inputArg.getValue().c_str());
+			if(*inputFileStream) return *inputFileStream;
+			cerr << "Error: File not found." << endl;
+		}
+	} catch (TCLAP::ArgException &e) {
+		cerr << "Error: " << e.error() << " for arg " << e.argId() << endl; 
+	}
+
+	return cin;
 }
 @
 
@@ -67,8 +109,13 @@ void DisplayPreprocessStream ( Scanner& scanner ) {
 
 \subsection{Listing}
 <<YABOC : Implementation>>=
+#include <string>
 #include <iostream>
+#include <fstream>
+#include <tclap/CmdLine.h>
 #include "Scanner.hh"
+
+#define VERSION_NUMBER "0.1" 
 
 using namespace std;
 
@@ -78,9 +125,9 @@ using namespace std;
 
 int main (int argc, char** argv) {
 	bool optPreprocess = false;
-	ArgumentHandler(argc, argv, &optPreprocess);	
+	istream& inputStream = ArgumentHandler(argc, argv, &optPreprocess);	
 
-	Scanner scanner(cin);
+	Scanner scanner(inputStream);
 	if(optPreprocess) DisplayPreprocessStream(scanner);
 
 	return 0;

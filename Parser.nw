@@ -1,15 +1,25 @@
 \section{Parser}
-The main goal of this parser--- since only one grammar rules is necessary, is to rewrite tokens into a special structure called \gls{AST}. This \gls{AST} will help manipulate and transform source code during optimization. 
+The main goal of this parser--- since only one grammar rules is necessary, is to
+rewrite tokens into a special structure called \gls{AST}. This \gls{AST} will 
+help manipulate and transform source code during optimization. 
 
 \subsubsection{Syntax checking}
-The only possible syntax error is bracket unmatching. Therefore, during the \gls{AST} building, YABOC will check if the code leads to this situation.
+The only possible syntax error is bracket unmatching. Therefore, during the 
+\gls{AST} building, YABOC will check if the code leads to this situation.
 
-The algorithm is simple : Each opening bracket will increment a counter while each closing bracket will decrement it. When the parsing is done, the counter must be $0$, otherwise, there is bracket unmatching. 
+The algorithm is simple : Each opening bracket will increment a counter while 
+each closing bracket will decrement it. When the parsing is done, the counter 
+must be $0$, otherwise, there is bracket unmatching. 
 
-\remark{The cons with this algorithm is that the parsing need to be finished to be effective. Moreover, no hint about the unmatching bracket position can be provided to the user.}
+\remark{The cons with this algorithm is that the parsing need to be finished to 
+be effective. Moreover, no hint about the unmatching bracket position can be 
+provided to the user.}
 
 \subsection{AST}
-The mother class of every node contains no data while child classes contain behavioral and data information. Moreover, the term \gls{AST} is abusive because every Node are stored into a vector and had, at most, one child list. It will be used anyway to keep the terminology of compiler construction.
+The mother class of every node contains no data while child classes contain 
+behavioral and data information. Moreover, the term \gls{AST} is abusive 
+because every Node are stored into a vector and had, at most, one composite 
+child.  It will be used anyway to keep the terminology of compiler construction.
 
 \newpar The classe is defined by the following header 
 <<Node : Header>>=
@@ -32,15 +42,19 @@ Node::~Node() { }
 @
 
 \subsubsection{Arithmetic node}
-This kind of node handle every arithmetic operations allowed on data pointed by the \gls{DP} such as :
+This kind of node handle every arithmetic operations allowed on data pointed by 
+the \gls{DP} such as :
 \begin{itemize}
 	\item \ttt{TOKEN\_PLUS}
 	\item \ttt{TOKEN\_MINUS}
 \end{itemize}
 
-Moreover, the instance of \ttt{ArithmeticNode} keep a compositional cardinality, \ie the number of time the operator has to be applied.
+Moreover, the instance of \ttt{ArithmeticNode} keep a compositional cardinality,
+\ie the number of time the operator has to be applied.
 
-\remark{The node representing ``+'' and ``-'' have the same type because it will simplifie the optimization and especially the redundant code elimination\pref{RCE} and the arithmetic simplification\pref{AS}.}
+\remark{The node representing ``+'' and ``-'' have the same type because it will
+simplifie the optimization and especially the redundant code elimination
+\pref{RCE} and the arithmetic simplification\pref{AS}.}
 
 <<ArithmeticNode : Header>>=
 #ifndef ARITHMETIC_NODE_HH

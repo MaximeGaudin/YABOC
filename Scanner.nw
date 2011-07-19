@@ -1,9 +1,16 @@
 \section{Scanner}
-The purpose of a scanner is to transform caracter data into symbolic data and keep only the programmaticaly usefull one (\ie only the instruction). The lexing of \brainfuck is trivial because each instruction is encoded with only one caracter. Hence the \tsl{lexing unit} have to read sequentially each caracter and return it's \gls{lexeme}. Because the scanner uses a stream to read characters, when all characters are read, there's no way to recover them if they were not saved.
+The purpose of a scanner is to transform caracter data into symbolic data and 
+keep only the programmaticaly usefull one (\ie only the instruction). The lexing
+of \brainfuck is trivial because each instruction is encoded with only one 
+caracter. Hence the \tsl{lexing unit} have to read sequentially each caracter
+and return it's \gls{lexeme}. Because the scanner uses a stream to read 
+characters, when all characters are popped, there's no way to recover them if 
+they were not saved.
 
 The tokens are defined as follow :
 \begin{itemize}
-	\item \ttt{TOKEN\_EOF} stands for the EOF (\ie end of string, end of stream or end of file),
+	\item \ttt{TOKEN\_EOF} stands for the EOF (\ie end of string, end of stream 
+  or end of file),
 
 	\item \ttt{TOKEN\_PLUS} stands for the caracter `+',
 	\item \ttt{TOKEN\_MINUS} stands for the caracter `-',
@@ -21,7 +28,8 @@ The tokens are defined as follow :
 \end{itemize}
 
 \subsection{Significant lexemes\label{significantLexemes}}
-Since Brainfuck allows to put in source code any caracter, the scanner get rid of lexemes. The ones that will be kept are every token except :
+Since Brainfuck allows to put in source code any caracter, the scanner get rid 
+of some lexemes. The ones that will be kept are every token except :
 \begin{enumerate}
 	\item \ttt{TOKEN\_EOF},
 	\item and \ttt{TOKEN\_OTHER}.
@@ -29,7 +37,9 @@ Since Brainfuck allows to put in source code any caracter, the scanner get rid o
 
 \subsection{Available methods}
 \paragraph{Constructor} 
-In a generality goal, the scanner will take a stream and therefore, allow the user to give him a string, a file, or directly the \tsl{standard input}. The constructor will keep a copy of this stream for a further use :
+In a generality goal, the scanner will take a stream and therefore, allow the 
+user to give him a string, a file, or directly the \tsl{standard input}. The
+constructor will keep a copy of this stream for a further use :
 
 <<Scanner : Constructor>>=
 Scanner::Scanner ( istream& inputStream ) 
@@ -37,17 +47,10 @@ Scanner::Scanner ( istream& inputStream )
 { }
 @
 
-\paragraph{Next}
-This function return the next token read on the input stream. If no more token are available, the token \ttt{TOKEN\_EOF} is returned.
-
-<<Scanner: Next>>=
-Token Scanner::Next( ) {
-	char buffer[1];
-	if(_inputStream.good()) {
-		if(_inputStream.eof()) return TOKEN_EOF;
-
-		_inputStream.read(buffer, 1);
-		switch(buffer[0]) {
+\paragraph{getToken}
+<<Scanner: getToken>>=
+Token Scanner::getToken (char lexem) {
+		switch(lexem) {
 			case('+'): return TOKEN_PLUS;
 			case('-'): return TOKEN_MINUS;
 				   
@@ -62,10 +65,38 @@ Token Scanner::Next( ) {
 
 			default: return TOKEN_OTHER;
 		}
+}
+@
+
+\paragraph{Pop}
+This function returns the next token read on the input stream and remove it
+from the stack. If no more token are available, the token \ttt{TOKEN\_EOF} is 
+returned.
+
+<<Scanner: Pop>>=
+Token Scanner::Pop( ) {
+	char buffer[1];
+	if( _inputStream.good() ) {
+		if( _inputStream.eof() ) return TOKEN_EOF;
+		_inputStream.read( buffer, 1 );
+    return getToken( buffer[0] );
 	} else return TOKEN_EOF;
 }
 @
 
+\paragraph{Top}
+This function returns the next token read on the input stream but don't  remove
+it from the stack. If no more token are available, the token \ttt{TOKEN\_EOF} 
+is returned.
+
+<<Scanner: Top>>=
+Token Scanner::Top( ) {
+	if( _inputStream.good() ) {
+		if( _inputStream.eof() ) return TOKEN_EOF;
+    return getToken( _inputStream.peek() );
+	} else return TOKEN_EOF;
+}
+@
 \subsection{Listings}
 <<Scanner : Header>>=
 #ifndef LEXER_HH
@@ -95,7 +126,11 @@ enum Token {
 class Scanner {
 	public:
 		Scanner ( istream& inputStream);
-		Token Next ();
+		Token Pop();
+		Token Top();
+
+  protected:
+    Token getToken(char lexem);
 
 	private:
 		istream& _inputStream;
@@ -107,5 +142,7 @@ class Scanner {
 #include "Scanner.hh"
 
 <<Scanner : Constructor>>
-<<Scanner: Next>>
+<<Scanner: Pop>>
+<<Scanner: Top>>
+<<Scanner: getToken>>
 @

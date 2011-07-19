@@ -6,34 +6,44 @@
         \item getting familiar with code generation via \tsl{LLVM}.
 \end{enumerate}
 
-To fill this goals, I created a program to generate optimized\footnote{Before LLVM optimized it} native code from Brainfuck code. The program can also :
+\newpar To fill this goals, I created a program to generate optimized
+\footnote{Before LLVM optimized it} native code from Brainfuck code.
+The program can also :
 \begin{itemize}
-        \item Display the preprocessed\pref{significantLexemes} Brainfuck source code,
+        \item Display the preprocessed\pref{significantLexemes} \brainfuck 
+        source code,
         \item display the optimized Brainfuck (at different stages) source code,
         \item and display the generated LLVM bytecode.
 \end{itemize}
 
 \paragraph{Tools} 
-Obviously, I do not attempt to develop the reference Brainfuck compiler (especially since many exist yet !) but I will try to code in the most generic way. For this purpose, I will only use standard tools such as :
+Obviously, I do not attempt to develop a cutting-edge \brainfuck compiler
+(especially since many exist yet !) but I will try to code in the most generic 
+way. For this purpose, I will only use standard tools such as :
 \begin{itemize}
         \item \tbf{TCLAP} for command line arguments parsing
         \item \tbf{make} for build pipeline,
         \item \tbf{C++} as programming language,
         \item \tbf{\LaTeX} as typesetting language,
-        \item \tbf{CLang++} as compiler (which can be switch to g++ without code modification),
+        \item \tbf{CLang++} as compiler (which can be switch to g++ 
+                any without code modification),
         \item \tbf{LLVM} as code generator,
         \item and \tbf{weave} \& \tbf{tangle} as code dispatchers.
 \end{itemize}
 
 \subsection{Architecture}
-The architecture of \gls{YABOC} if fairly simple because it's pipeline is linear (\cf \fref{fig1}).
+The architecture of \gls{YABOC} if fairly simple because it's pipeline is
+linear (\cf \fref{fig1}).
 \image[Architecture of YABOC]{img/Architecture.eps}{.2}
 It's composed by :
 \begin{itemize}
-        \item The scanner, which read every caracter, transform into \gls{lexeme} and keep only the significant ones\pref{significantLexemes}.
+        \item The scanner, which read every caracter, transform into \gls{lexeme} and 
+  keep only the significant ones\pref{significantLexemes}.
         \item The parser, which generate \gls{IL} from tokens.
-        \item The optimizer, which transform \gls{IL} into a better efficient form\pref{optimizations}.
-        \item The code generator, which interpret every lexemes to it's LLVM representation.
+        \item The optimizer, which transform \gls{IL} into a better efficient 
+  form\pref{optimizations}.
+        \item The code generator, which interpret every lexemes to it's LLVM 
+  representation.
         \item The LLVM, which generate the byte code.
         \item The compiler, which generate the native code.
 \end{itemize}
@@ -42,7 +52,11 @@ It's composed by :
 
 \subsection{Features}
 \subsubsection{Argument handler}
-To choose which feature to enable and which feature to disable, the program need a the argument handler to translate the command arguments to values that YABOC could manage easily. To perform this task, YABOC uses a well-done and well-documented library called TCALP\footnote{\cf \url{http://tclap.sourceforge.net/} for further information.}.
+To choose which feature to enable and which feature to disable, the program
+need an argument handler to translate the command arguments to values that 
+YABOC could manage easily. To perform this task, YABOC uses a well-done and 
+well-documented library called TCALP \footnote{\cf 
+\url{http://tclap.sourceforge.net/} for further information.}.
 
 There is two types of arguments :
 \begin{itemize}
@@ -53,30 +67,60 @@ There is two types of arguments :
 \paragraph{Switches} 
 The following switches are available :
 \begin{itemize}
-        \item \ttt{-p / --preprocess} : If set, the program will display the preprocessed stream of BF code. It not, the program do nothing concerning preprocessed stream.
+        \item \ttt{-p / --preprocess} : If set, the program will display the
+  preprocessed stream of BF code. It not, the program do nothing concerning 
+  preprocessed stream.
 \end{itemize}
 
 \paragraph{Values}
 The following values can be set :
 \begin{itemize}
-        \item \ttt{-i / --input} : If set, the value will be used to read the brainfuck code from. The program will also check that the file exists. If not, the standard input is return as input stream.
+        \item \ttt{-i / --input} : If set, the value will be used to read the 
+  brainfuck code from. The program will also check that the file exists. If 
+  not, the standard input is return as input stream.
+        \item \ttt{-s / --cell-size} : Must be 16, 32 or 64 and set the size of values 
+  (memory cells).\ti
+        \item \ttt{-r / --cell-range} : Set the number of the statically allocated cell. 
+  Must be greater than 0.\ti
 \end{itemize}
 
 \nwenddocs{}\nwbegincode{1}\moddef{YABOC : ArgumentHandler}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
-istream& ArgumentHandler(int argc, char** argv, bool* optPreprocess) \{
+istream& ArgumentHandler
+  (
+  int argc, 
+  char** argv, 
+  bool* optPreprocess, 
+  unsigned int* cellSize, 
+  unsigned int* cellRange
+  ) \{
         // Set default values
         *optPreprocess = false;
 
         try \{
-                TCLAP::CmdLine cmd("YABOC, Yet Another Brainfuck Optimizer & Compiler.", ' ', VERSION_NUMBER);
+                TCLAP::CmdLine cmd("YABOC, Yet Another Brainfuck Optimizer & Compiler.", ' ' , VERSION_NUMBER);
 
-                TCLAP::ValueArg<std::string> inputArg("i","input","Input file to read the brainfuck code from.", false, "","filename");
-                TCLAP::SwitchArg pSwitch("p","preprocessed","Display the preprocessed stream.", cmd, false);
+                TCLAP::ValueArg<std::string> inputArg("i","input", "Input file to read the brainfuck code from.", false, "","filename");
+                TCLAP::ValueArg<unsigned int> sizeArg("s","cell-size", "Set the size of \\
+    memory cells. Must be 16, 32 or 64.", false, 16,"Cell-size");
+                TCLAP::ValueArg<unsigned int> rangeArg("r","cell-range", "Set the number \\
+    of statically allocated cell. Must be greater than 0.", false, 60000,
+    "Cell-range");
+                TCLAP::SwitchArg pSwitch("p", "preprocessed","Display the preprocessed stream.", cmd, false);
 
                 cmd.add (inputArg);
+                cmd.add (sizeArg);
+                cmd.add (rangeArg);
                 cmd.parse ( argc, argv );
 
                 *optPreprocess = pSwitch.getValue();
+
+    if(sizeArg.getValue() == 16 
+    || sizeArg.getValue() == 32 
+    || sizeArg.getValue() == 64) *cellSize= sizeArg.getValue();
+    else cerr << "Error: Cell size must be 16, 32 or 64." << endl;
+
+                *cellRange= rangeArg.getValue();
+
                 if(inputArg.getValue() == "") return cin;
                 else \{
                         ifstream* inputFileStream = new ifstream(inputArg.getValue().c_str());
@@ -92,16 +136,20 @@ istream& ArgumentHandler(int argc, char** argv, bool* optPreprocess) \{
 \nwendcode{}\nwbegindocs{2}\nwdocspar
 
 \subsubsection{Preprocessing}
-The preprocessing feature display the kept tokens one following another from the input stream. Because the token out of the scanner are already known to be valid, the method only output the result of {\Tt{}Scanner\ :\ Next\nwendquote}. After the display of all available tokens, a carriage return is printed.
+The preprocessing feature display the kept tokens one following another from 
+the input stream. Because the token out of the scanner are already known to be
+valid, the method only output the result of {\Tt{}Scanner\ :\ Next\nwendquote}. After the 
+display of all available tokens, a carriage return is printed.
 
-\newpar If the option was the only specified, the program exits. Otherwise, the other options are handled.
+\newpar If the option was the only specified, the program exits. Otherwise, the 
+other options are handled.
 
 \nwenddocs{}\nwbegincode{3}\moddef{YABOC : DisplayPreprocessStream}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
 void DisplayPreprocessStream ( Scanner& scanner ) \{
-        char buffer = scanner.Next();
+        char buffer = scanner.Pop();
         while(buffer != TOKEN_EOF) \{
                 if(buffer != TOKEN_OTHER) cout << buffer;
-                buffer = scanner.Next();
+                buffer = scanner.Pop();
         \}
         cout << endl;
 \}
@@ -125,7 +173,11 @@ using namespace std;
 
 int main (int argc, char** argv) \{
         bool optPreprocess = false;
-        istream& inputStream = ArgumentHandler(argc, argv, &optPreprocess);     
+  unsigned int cellSize=0;
+  unsigned int cellRange=0;
+
+        istream& inputStream = ArgumentHandler(argc, argv, &optPreprocess,
+  &cellSize, &cellRange);       
 
         Scanner scanner(inputStream);
         if(optPreprocess) DisplayPreprocessStream(scanner);
@@ -137,11 +189,18 @@ int main (int argc, char** argv) \{
 \nwenddocs{}\nwbegincode{7}\moddef{YABOC : Header}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
 \nwendcode{}\nwbegindocs{8}\nwdocspar
 \nwenddocs{}\nwfilename{Scanner.nw}\nwbegindocs{0}\section{Scanner}
-The purpose of a scanner is to transform caracter data into symbolic data and keep only the programmaticaly usefull one (\ie only the instruction). The lexing of \brainfuck is trivial because each instruction is encoded with only one caracter. Hence the \tsl{lexing unit} have to read sequentially each caracter and return it's \gls{lexeme}. Because the scanner uses a stream to read characters, when all characters are read, there's no way to recover them if they were not saved.
+The purpose of a scanner is to transform caracter data into symbolic data and 
+keep only the programmaticaly usefull one (\ie only the instruction). The lexing
+of \brainfuck is trivial because each instruction is encoded with only one 
+caracter. Hence the \tsl{lexing unit} have to read sequentially each caracter
+and return it's \gls{lexeme}. Because the scanner uses a stream to read 
+characters, when all characters are popped, there's no way to recover them if 
+they were not saved.
 
 The tokens are defined as follow :
 \begin{itemize}
-        \item \ttt{TOKEN\_EOF} stands for the EOF (\ie end of string, end of stream or end of file),
+        \item \ttt{TOKEN\_EOF} stands for the EOF (\ie end of string, end of stream 
+  or end of file),
 
         \item \ttt{TOKEN\_PLUS} stands for the caracter `+',
         \item \ttt{TOKEN\_MINUS} stands for the caracter `-',
@@ -159,7 +218,8 @@ The tokens are defined as follow :
 \end{itemize}
 
 \subsection{Significant lexemes\label{significantLexemes}}
-Since Brainfuck allows to put in source code any caracter, the scanner get rid of lexemes. The ones that will be kept are every token except :
+Since Brainfuck allows to put in source code any caracter, the scanner get rid 
+of some lexemes. The ones that will be kept are every token except :
 \begin{enumerate}
         \item \ttt{TOKEN\_EOF},
         \item and \ttt{TOKEN\_OTHER}.
@@ -167,7 +227,9 @@ Since Brainfuck allows to put in source code any caracter, the scanner get rid o
 
 \subsection{Available methods}
 \paragraph{Constructor} 
-In a generality goal, the scanner will take a stream and therefore, allow the user to give him a string, a file, or directly the \tsl{standard input}. The constructor will keep a copy of this stream for a further use :
+In a generality goal, the scanner will take a stream and therefore, allow the 
+user to give him a string, a file, or directly the \tsl{standard input}. The
+constructor will keep a copy of this stream for a further use :
 
 \nwenddocs{}\nwbegincode{1}\moddef{Scanner : Constructor}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
 Scanner::Scanner ( istream& inputStream ) 
@@ -175,17 +237,10 @@ Scanner::Scanner ( istream& inputStream )
 \{ \}
 \nwendcode{}\nwbegindocs{2}\nwdocspar
 
-\paragraph{Next}
-This function return the next token read on the input stream. If no more token are available, the token \ttt{TOKEN\_EOF} is returned.
-
-\nwenddocs{}\nwbegincode{3}\moddef{Scanner: Next}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
-Token Scanner::Next( ) \{
-        char buffer[1];
-        if(_inputStream.good()) \{
-                if(_inputStream.eof()) return TOKEN_EOF;
-
-                _inputStream.read(buffer, 1);
-                switch(buffer[0]) \{
+\paragraph{getToken}
+\nwenddocs{}\nwbegincode{3}\moddef{Scanner: getToken}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+Token Scanner::getToken (char lexem) \{
+                switch(lexem) \{
                         case('+'): return TOKEN_PLUS;
                         case('-'): return TOKEN_MINUS;
                                    
@@ -200,12 +255,40 @@ Token Scanner::Next( ) \{
 
                         default: return TOKEN_OTHER;
                 \}
-        \} else return TOKEN_EOF;
 \}
 \nwendcode{}\nwbegindocs{4}\nwdocspar
 
+\paragraph{Pop}
+This function returns the next token read on the input stream and remove it
+from the stack. If no more token are available, the token \ttt{TOKEN\_EOF} is 
+returned.
+
+\nwenddocs{}\nwbegincode{5}\moddef{Scanner: Pop}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+Token Scanner::Pop( ) \{
+        char buffer[1];
+        if( _inputStream.good() ) \{
+                if( _inputStream.eof() ) return TOKEN_EOF;
+                _inputStream.read( buffer, 1 );
+    return getToken( buffer[0] );
+        \} else return TOKEN_EOF;
+\}
+\nwendcode{}\nwbegindocs{6}\nwdocspar
+
+\paragraph{Top}
+This function returns the next token read on the input stream but don't  remove
+it from the stack. If no more token are available, the token \ttt{TOKEN\_EOF} 
+is returned.
+
+\nwenddocs{}\nwbegincode{7}\moddef{Scanner: Top}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+Token Scanner::Top( ) \{
+        if( _inputStream.good() ) \{
+                if( _inputStream.eof() ) return TOKEN_EOF;
+    return getToken( _inputStream.peek() );
+        \} else return TOKEN_EOF;
+\}
+\nwendcode{}\nwbegindocs{8}\nwdocspar
 \subsection{Listings}
-\nwenddocs{}\nwbegincode{5}\moddef{Scanner : Header}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{9}\moddef{Scanner : Header}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
 #ifndef LEXER_HH
 #define LEXER_HH
 #include <istream>
@@ -233,32 +316,48 @@ enum Token \{
 class Scanner \{
         public:
                 Scanner ( istream& inputStream);
-                Token Next ();
+                Token Pop();
+                Token Top();
+
+  protected:
+    Token getToken(char lexem);
 
         private:
                 istream& _inputStream;
 \};
 #endif
-\nwendcode{}\nwbegindocs{6}\nwdocspar
+\nwendcode{}\nwbegindocs{10}\nwdocspar
 
-\nwenddocs{}\nwbegincode{7}\moddef{Scanner : Implementation}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
+\nwenddocs{}\nwbegincode{11}\moddef{Scanner : Implementation}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
 #include "Scanner.hh"
 
 \LA{}Scanner : Constructor\RA{}
-\LA{}Scanner: Next\RA{}
-\nwendcode{}\nwbegindocs{8}\nwdocspar
+\LA{}Scanner: Pop\RA{}
+\LA{}Scanner: Top\RA{}
+\LA{}Scanner: getToken\RA{}
+\nwendcode{}\nwbegindocs{12}\nwdocspar
 \nwenddocs{}\nwfilename{Parser.nw}\nwbegindocs{0}\section{Parser}
-The main goal of this parser--- since only one grammar rules is necessary, is to rewrite tokens into a special structure called \gls{AST}. This \gls{AST} will help manipulate and transform source code during optimization. 
+The main goal of this parser--- since only one grammar rules is necessary, is to
+rewrite tokens into a special structure called \gls{AST}. This \gls{AST} will 
+help manipulate and transform source code during optimization. 
 
 \subsubsection{Syntax checking}
-The only possible syntax error is bracket unmatching. Therefore, during the \gls{AST} building, YABOC will check if the code leads to this situation.
+The only possible syntax error is bracket unmatching. Therefore, during the 
+\gls{AST} building, YABOC will check if the code leads to this situation.
 
-The algorithm is simple : Each opening bracket will increment a counter while each closing bracket will decrement it. When the parsing is done, the counter must be $0$, otherwise, there is bracket unmatching. 
+The algorithm is simple : Each opening bracket will increment a counter while 
+each closing bracket will decrement it. When the parsing is done, the counter 
+must be $0$, otherwise, there is bracket unmatching. 
 
-\remark{The cons with this algorithm is that the parsing need to be finished to be effective. Moreover, no hint about the unmatching bracket position can be provided to the user.}
+\remark{The cons with this algorithm is that the parsing need to be finished to 
+be effective. Moreover, no hint about the unmatching bracket position can be 
+provided to the user.}
 
 \subsection{AST}
-The mother class of every node contains no data while child classes contain behavioral and data information. Moreover, the term \gls{AST} is abusive because every Node are stored into a vector and had, at most, one child list. It will be used anyway to keep the terminology of compiler construction.
+The mother class of every node contains no data while child classes contain 
+behavioral and data information. Moreover, the term \gls{AST} is abusive 
+because every Node are stored into a vector and had, at most, one composite 
+child.  It will be used anyway to keep the terminology of compiler construction.
 
 \newpar The classe is defined by the following header 
 \nwenddocs{}\nwbegincode{1}\moddef{Node : Header}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
@@ -281,21 +380,24 @@ Node::~Node() \{ \}
 \nwendcode{}\nwbegindocs{4}\nwdocspar
 
 \subsubsection{Arithmetic node}
-This kind of node handle every arithmetic operations allowed on data pointed by the \gls{DP} such as :
+This kind of node handle every arithmetic operations allowed on data pointed by 
+the \gls{DP} such as :
 \begin{itemize}
         \item \ttt{TOKEN\_PLUS}
         \item \ttt{TOKEN\_MINUS}
 \end{itemize}
 
-Moreover, the instance of \ttt{ArithmeticNode} keep a compositional cardinality, \ie the number of time the operator has to be applied.
+Moreover, the instance of \ttt{ArithmeticNode} keep a compositional cardinality,
+\ie the number of time the operator has to be applied.
 
-\remark{The node representing ``+'' and ``-'' have the same type because it will simplifie the optimization and especially the redundant code elimination\pref{RCE} and the arithmetic simplification\pref{AS}.}
+\remark{The node representing ``+'' and ``-'' have the same type because it will
+simplifie the optimization and especially the redundant code elimination
+\pref{RCE} and the arithmetic simplification\pref{AS}.}
 
 \nwenddocs{}\nwbegincode{5}\moddef{ArithmeticNode : Header}\endmoddef\nwstartdeflinemarkup\nwenddeflinemarkup
 #ifndef ARITHMETIC_NODE_HH
 #define ARITHMETIC_NODE_HH
 #include "Node.hh"
-
 
 class ArithmeticNode : Node \{
         public:
@@ -349,6 +451,7 @@ unsigned int ArithmeticNode::getCardinality ( ) \{ return _operation; \}
 \subsubsection{I/O node}
 
 \subsubsection{While Node}
+This node is very particular since it's the only one to contain other nodes. 
 \nwenddocs{}\nwfilename{Optimizer.nw}\nwbegindocs{0}\section{Optimizer}
 
 \subsection{Redundant code elimination\label{RCE}}

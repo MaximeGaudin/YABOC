@@ -5,9 +5,9 @@ COMPILE_SUCCESS=0
 COMPILE_FAIL=1
 COMPILE=${COMPILE_SUCCESS}
 
-all: check_directory check_git ${BIN_DIRECTORY}${OUTPUT_FILENAME}.pdf clean_latexmk_files
+all: check_directory check_git ${BIN_DIRECTORY}${OUTPUT_FILENAME}.pdf
 
-${BIN_DIRECTORY}${OUTPUT_FILENAME}.pdf: ${SRC_DIRECTORY}*.tex ${SRC_DIRECTORY}*.bib 
+${BIN_DIRECTORY}${OUTPUT_FILENAME}.pdf: ${SRC_DIRECTORY}*.tex ${SRC_DIRECTORY}*.bib clean_latexmk_files
 	@COMPILE=0; \
 	echo ${CYAN} "${HEADER}Compilation ..." ${NORMAL}; \
 	cd src && latexmk -r ../${BUILD_DIRECTORY}${LATEXMKRC} -f- -silent main.tex || COMPILE=1; \
